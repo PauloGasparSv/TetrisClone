@@ -1,7 +1,7 @@
 import java.awt.Graphics2D;
 
 public class Menu extends GameState{
-	
+
 	public Menu(GameStateManager gsm, Loader loader){
 		super(gsm,loader);
 	}

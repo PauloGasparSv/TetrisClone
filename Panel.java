@@ -10,7 +10,7 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
 public class Panel extends JPanel implements Runnable,KeyListener{
-	public static final int WIDTH = 800;
+	public static final int WIDTH = 550;
 	public static final int HEIGHT = 600;
 	private boolean running;
 	private Thread thread;
@@ -34,9 +34,9 @@ public class Panel extends JPanel implements Runnable,KeyListener{
 	}
 
 	private void init(){
-		stage = new BufferedImage(WIDTH,HEIGHT,BufferedImage.TYPE_INT_RGB);
+		stage = new BufferedImage(WIDTH+20,HEIGHT+20,BufferedImage.TYPE_INT_RGB);
 		g = (Graphics2D) stage.getGraphics();
-		g.setBackground(Color.WHITE);
+		g.setBackground(new Color(68,80,128));
 		gsm = new GameStateManager();
 		running = true;
 	}
@@ -59,7 +59,7 @@ public class Panel extends JPanel implements Runnable,KeyListener{
 			gsm.update(delta);
 			gsm.draw(g);
 			Graphics g2 = getGraphics();
-			g2.drawImage(stage,0,0,WIDTH,HEIGHT,null);
+			g2.drawImage(stage,0,0,null);
 			g2.dispose();
 
 			try{

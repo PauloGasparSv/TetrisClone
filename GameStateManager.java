@@ -9,7 +9,7 @@ public class GameStateManager{
 
 	public GameStateManager(){
 		loader = new Loader();
-		setState(MENU);
+		setState(GAME);
 	}
 
 	public void update(double delta){
