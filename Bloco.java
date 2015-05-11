@@ -17,14 +17,14 @@ public class Bloco{
 			pos[1] = new Point(4,1);
 			pos[2] = new Point(4,2);
 			pos[3] = new Point(5,2);
-			lock = 2;
+			lock = 1;
 		}
 		if(type == Game.ILBLOCK){
 			pos[0] = new Point(4,0);
 			pos[1] = new Point(4,1);
 			pos[2] = new Point(4,2);
 			pos[3] = new Point(3,2);
-			lock = 2;
+			lock = 1;
 		}
 		if(type == Game.SWIGBLOCK){
 			pos[0] = new Point(3,0);
@@ -66,7 +66,7 @@ public class Bloco{
 		return type;
 	}
 
-	public void getDown(){
+	public void goDown(){
 		for(int i = 0; i < 4; i++)
 			pos[i].y ++;
 	}
@@ -77,40 +77,40 @@ public class Bloco{
 	}
 	
 	public boolean canMove(int dir, int [][]map){
+		int can = 0;
 		for(int i = 0; i < 4; i++)
 			if(pos[i].x + dir >-1 && pos[i].x + dir <10)
 				if(map[pos[i].y][pos[i].x + dir] == -1)
-					return true;
-		return false;
+					can ++;
+		return can == 4 ? true : false;
 	}
 
 	public Point [] getPos(){
 		return pos;
 	}
 
-	private void turn(){
+
+	public void turnAcw(){
 		if(lock != -1){
-			Point [] temp = turnAcw();
-			if(temp != null)
+			Point [] temp = new Point[4];
+			temp[lock] = pos[lock];
+
+			int tempX = -1;
+			int tempY = -1;
+
+			boolean no = false;
+
+			for(int i = 0; i < 4; i++){
+				if(i != lock){
+					tempX = pos[i].y - pos[lock].y + pos[lock].x;
+					tempY =  pos[lock].y - (pos[i].x - pos[lock].x);
+					temp[i] = new Point(tempX,tempY);
+					if(tempX < 0 || tempX > 9 || tempY < 0 || tempY > 19)
+						no = true;
+				}
+			}
+			if(!no)
 				pos = temp;
 		}
-	}
-
-	private Point [] turnAcw(){
-		Point [] temp = new Point[4];
-		temp[lock] = pos[lock];
-
-		int tempX = -1;
-		int tempY = -1;
-
-		for(int i = 0; i < 4 && i != lock; i++){
-			tempX = pos[i].y - pos[lock].y + pos[lock].x;
-			tempY = pos[i].x - pos[lock].x + pos[lock].y;
-			temp[i] = tempX >= 0 && tempX <=9 && tempY >= 0 && tempY <=19 ? new Point(tempX,tempY) : null;
-			if(temp[i] == null)
-				return null;
-		}
-
-		return temp;
 	}
 }

@@ -7,7 +7,7 @@ public class Game extends GameState{
 
 	int [][] blocks; 
 	Bloco block;
-	boolean rightKey,leftKey,turnKey;
+	boolean rightKey,leftKey,turnKey,pressedTurn;
 	BufferedImage[] blockImg;
 	BufferedImage[] nextBlockImg;
 	BufferedImage background;
@@ -21,7 +21,6 @@ public class Game extends GameState{
 
 	public void init(Loader l){
 		blocks = new int[20][10];
-		block = new Bloco(LBLOCK);
 
 		for(int row = 0; row < 20; row++)
 			for(int col = 0; col < 10; col ++)
@@ -43,20 +42,36 @@ public class Game extends GameState{
 
 		background = l.image("assets/background.png");
 
-		rightKey = leftKey = turnKey = false;
+		rightKey = leftKey = turnKey = pressedTurn = false;
 		timerR = timerL = timerY = 0;
 
+		block = new Bloco(ILBLOCK);
 
+		timerY = System.nanoTime();
 	}	
 
 	public void update(double delta){
+		if(System.nanoTime() - timerY > 500000000){
+			timerY = System.nanoTime();
+			//block.goDown();
+		}
+
 		if(rightKey){
-			if(block.canMove(1,blocks))
+			if(block.canMove(1,blocks) && System.nanoTime() - timerR >= 65000000){
 				block.move(1);
+				timerR = System.nanoTime();
+			}
 		}
 		else if(leftKey){
-			if(block.canMove(-1,blocks))
+			if(block.canMove(-1,blocks) && System.nanoTime() - timerL >= 65000000){
 				block.move(-1);
+				timerL = System.nanoTime();
+			}
+		}
+
+		if(pressedTurn){
+			block.turnAcw();
+			pressedTurn = false;
 		}
 
 	}
@@ -82,6 +97,7 @@ public class Game extends GameState{
 		if(k == KeyEvent.VK_RIGHT){
 			if(!rightKey){
 				rightKey = true;
+				timerR = System.nanoTime();
 				if(block.canMove(1,blocks))
 					block.move(1);
 			}
@@ -89,10 +105,20 @@ public class Game extends GameState{
 		else if(k == KeyEvent.VK_LEFT){
 			if(!leftKey){
 				leftKey = true;	
+				timerL = System.nanoTime();
 				if(block.canMove(-1,blocks))
 					block.move(-1);
 			}
 		}
+
+		if(k == KeyEvent.VK_SPACE){
+			if(!turnKey){
+				turnKey = true;
+				pressedTurn = true;
+			}
+		}
+
+
 	}
 
 	public void keyReleased(int k){
@@ -100,6 +126,8 @@ public class Game extends GameState{
 			rightKey = false;
 		if(k == KeyEvent.VK_LEFT)
 			leftKey = false;
+		if(k == KeyEvent.VK_SPACE)
+			turnKey = false;
 	}
 
 }
