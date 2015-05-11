@@ -25,7 +25,6 @@ public class Panel extends JPanel implements Runnable,KeyListener{
 		if(thread == null){	
 			thread = new Thread(this);
 			thread.start();
-			System.out.println("CU");
 		}
 	}
 
