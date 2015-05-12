@@ -21,6 +21,10 @@ public class Game extends GameState{
 
 	private int points;
 	private int lines; 
+	private int level;
+	private int next;
+
+	public boolean end;
 
 	private int nextBlock;
 
@@ -31,7 +35,7 @@ public class Game extends GameState{
 
 	public void init(Loader l){
 		blocks = new int[20][10];
-
+		end = false;
 		for(int row = 0; row < 20; row++)
 			for(int col = 0; col < 10; col ++)
 				blocks[row][col] = -1;
@@ -62,77 +66,101 @@ public class Game extends GameState{
 		bottomL = bottomR = bottomSpin = 0;
 		points = lines = 0;
 		timerY = System.nanoTime();
+		level = 1;
+		next = 4;
 	}	
 
 	public void update(double delta){
-		if(System.nanoTime() - timerY > 800000000){
-			timerY = System.nanoTime();
-			block.goDown(blocks);
-		}
+		if(!end){
+			int t = (800000000 - level*2000000) > 100000000?  (800000000 - level*2000000) :100000000; 
+			if(System.nanoTime() - timerY > 800000000 - level*2000000){
+				timerY = System.nanoTime();
+				block.goDown(blocks);
+			}
 
-		if(rightKey){
-			if(block.canMove(1,blocks) && System.nanoTime() - timerR >= 65000000){
-				block.move(1);
-				timerR = System.nanoTime();
-				
+			if(rightKey){
+				if(block.canMove(1,blocks) && System.nanoTime() - timerR >= 65000000){
+					block.move(1);
+					timerR = System.nanoTime();
+					
+					if(!block.canGoDown(blocks)){
+						bottomR++;
+						stopTimer = System.nanoTime();
+					}
+
+				}
+			}
+			else if(leftKey){
+				if(block.canMove(-1,blocks) && System.nanoTime() - timerL >= 65000000){
+					block.move(-1);
+					timerL = System.nanoTime();
+				}
 				if(!block.canGoDown(blocks)){
-					bottomR++;
+						bottomL++;
+						stopTimer = System.nanoTime();
+				}
+			}
+
+			if(pressedTurn){
+				block.turnCw(blocks);
+				pressedTurn = false;
+				if(!block.canGoDown(blocks)){
+					bottomSpin++;
 					stopTimer = System.nanoTime();
 				}
+			}
 
+			if(downKey && System.nanoTime() - timerD > 40000000){
+				timerD = System.nanoTime();
+				block.goDown(blocks);
 			}
-		}
-		else if(leftKey){
-			if(block.canMove(-1,blocks) && System.nanoTime() - timerL >= 65000000){
-				block.move(-1);
-				timerL = System.nanoTime();
-			}
+
+
+			//CHECK END
 			if(!block.canGoDown(blocks)){
-					bottomL++;
+				if(!startedTimer){
 					stopTimer = System.nanoTime();
+					startedTimer = true;
+				}
+				if((System.nanoTime() - stopTimer)/10 > 90000000 || bottomR > 20 || bottomL > 20 || bottomSpin > 10){
+					startedTimer = false;
+					stopTimer = 0;
+
+					checkLose();
+					
+					if(!end){
+						for(int i = 0; i < 4; i++){
+							blocks[block.getPos()[i].y][block.getPos()[i].x] = block.getType();
+						}
+						Random rand = new Random();
+						block.setBlock(nextBlock);
+						nextBlock = rand.nextInt(7);
+						checkPoints();
+					}
+				
+				}
 			}
-		}
-
-		if(pressedTurn){
-			block.turnCw(blocks);
-			pressedTurn = false;
-			if(!block.canGoDown(blocks)){
-				bottomSpin++;
-				stopTimer = System.nanoTime();
-			}
-		}
-
-		if(downKey && System.nanoTime() - timerD > 40000000){
-			timerD = System.nanoTime();
-			block.goDown(blocks);
-		}
-
-
-		//CHECK END
-		if(!block.canGoDown(blocks)){
-			if(!startedTimer){
-				stopTimer = System.nanoTime();
-				startedTimer = true;
-			}
-			if((System.nanoTime() - stopTimer)/10 > 110000000 || bottomR > 20 || bottomL > 20 || bottomSpin > 10){
+			else{
+				bottomL = bottomR = bottomSpin = 0;
 				startedTimer = false;
 				stopTimer = 0;
-				for(int i = 0; i < 4; i++){
-					blocks[block.getPos()[i].y][block.getPos()[i].x] = block.getType();
-				}
-				Random rand = new Random();
-				block.setBlock(nextBlock);
-				nextBlock = rand.nextInt(7);
-				checkPoints();
 			}
 		}
-		else{
-			bottomL = bottomR = bottomSpin = 0;
-			startedTimer = false;
-			stopTimer = 0;
+	}
+	private void checkLose(){
+		int counter = 0;
+	
+		for(int i=0;i<4;i++)
+			if(block.getPos()[i].y<0)
+				end = true;
+		if(!end){
+			for(int col = 0; col < 10 ; col ++)
+				if(blocks[0][col] != -1)
+					counter ++;
+			if(counter>8)
+				end = true;
 		}
 	}
-
 	private void checkPoints(){
 		int [] rows = new int [4];
 		rows[0] = rows[1] = rows[2] = rows[3] = -1;
@@ -153,80 +181,121 @@ public class Game extends GameState{
 			for(int i = 0; i<cRow; i++)
 				for(int col = 0; col < 10; col ++)
 					blocks [rows[i]][col] = -1;
-			
-			for(int i = 0; i<cRow; i++){
-				for(int row = 18; row > -1; row --){
+
+			int rowToLook;
+			boolean [] isRow = {true,true,true,true,true,true,true
+				,true,true,true,true,true,true,true,true,true,
+				true,true,true,true};
+			int loops = 0;
+
+
+			rowToLook = rows[cRow - 1] - loops;
+			for(int i=0; i<10; i++){
+				for(int row = rowToLook; row > 0; row --){
+					int counter = 0;
 					for(int col = 0; col < 10; col ++){
-						if(blocks[row][col] != -1){
-							blocks[row+1][col] = blocks[row][col];
-							blocks[row][col] = -1;
+						if(blocks[row][col] == -1)
+							counter++;
+					}
+					if(counter == 10){
+						for(int col = 0; col < 10; col ++){
+							if(blocks[row-1][col] != -1){
+								blocks[row][col] = blocks[row-1][col];
+								blocks[row-1][col] = -1;
+							}
 						}
+					}
+					else{
+						break;
 					}
 				}
 			}
+
+
+			
+
 			lines += cRow;
 			points += cRow*cRow;
-		}
-		
-
-
-		
+			if(points > next)
+				level ++;
+			next = (level*4 + (int)((level*level)/2));
+		}		
 	}
 
 	public void draw(Graphics2D g){
 		g.clearRect(0,0,Panel.WIDTH+20,Panel.HEIGHT+20);
 		g.drawImage(background,0,0,null);
-		g.drawImage(nextBlockImg[nextBlock],400,50,null);
-		
-		g.drawString("Points: "+points,400,220);
-		g.drawString("Lines: "+lines,400,260);
 
-		for(int row = 0; row < 20; row ++){
-			for(int col = 0; col < 10; col ++){
-				if(blocks[row][col] != -1){
-					g.drawImage(blockImg[blocks[row][col]], 100+col*25,50+row*25,null);
+		if(!end){
+			g.drawImage(nextBlockImg[nextBlock],400,50,null);
+			
+			g.drawString("Points: "+points,405,215);
+			g.drawString("Lines: "+lines,405,245);
+			g.drawString("Level: "+level,405,275);
+			g.drawString("Next: "+next,405,305);
+
+			for(int row = 0; row < 20; row ++){
+				for(int col = 0; col < 10; col ++){
+					if(blocks[row][col] != -1){
+						g.drawImage(blockImg[blocks[row][col]], 100+col*25,50+row*25,null);
+					}
 				}
 			}
+
+			for(int i = 0; i < 4; i ++)
+				if(block.getPos()[i].y>-1)
+					g.drawImage(blockImg[block.getType()],100+block.getPos()[i].x*25,50+block.getPos()[i].y*25,null);
 		}
+		else{
+			g.drawString("YOU LOSE BUDDY",120,250);
+			g.drawString("PRESS ENTER TO ",120,300);
+			g.drawString("TRY AGAIN",120,330);
+			g.drawString("PRESS ESCAPE TO ",120,380);
+			g.drawString("EXIT",120,410);
 
-		for(int i = 0; i < 4; i ++)
-			g.drawImage(blockImg[block.getType()],100+block.getPos()[i].x*25,50+block.getPos()[i].y*25,null);
-
+		}
 	}
 
 	public void keyPressed(int k){
-		if(k == KeyEvent.VK_RIGHT){
-			if(!rightKey){
-				rightKey = true;
-				timerR = System.nanoTime();
-				if(block.canMove(1,blocks))
-					block.move(1);
+		if(!end){
+			if(k == KeyEvent.VK_RIGHT){
+				if(!rightKey){
+					rightKey = true;
+					timerR = System.nanoTime();
+					if(block.canMove(1,blocks))
+						block.move(1);
+				}
 			}
-		}
-		else if(k == KeyEvent.VK_LEFT){
-			if(!leftKey){
-				leftKey = true;	
-				timerL = System.nanoTime();
-				if(block.canMove(-1,blocks))
-					block.move(-1);
+			else if(k == KeyEvent.VK_LEFT){
+				if(!leftKey){
+					leftKey = true;	
+					timerL = System.nanoTime();
+					if(block.canMove(-1,blocks))
+						block.move(-1);
+				}
 			}
-		}
 
-		if(k == KeyEvent.VK_SPACE){
-			if(!turnKey){
-				turnKey = true;
-				pressedTurn = true;
+			if(k == KeyEvent.VK_SPACE){
+				if(!turnKey){
+					turnKey = true;
+					pressedTurn = true;
+				}
+			}
+
+			if(k == KeyEvent.VK_DOWN){
+				if(!downKey){
+					downKey = true;
+					timerD = System.nanoTime();
+					block.goDown(blocks);
+				}
 			}
 		}
-
-		if(k == KeyEvent.VK_DOWN){
-			if(!downKey){
-				downKey = true;
-				timerD = System.nanoTime();
-				block.goDown(blocks);
-			}
+		else{
+			if(k == KeyEvent.VK_ENTER)
+				gsm.setState(GameStateManager.GAME);
+			if(k == KeyEvent.VK_ESCAPE)
+				System.exit(0);
 		}
-
 
 	}
 

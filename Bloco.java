@@ -15,52 +15,52 @@ public class Bloco{
 		this.type = type;
 		stop = false;
 		if(type == Game.LBLOCK){
-			pos[0] = new Point(4,0);
-			pos[1] = new Point(4,1);
-			pos[2] = new Point(4,2);
-			pos[3] = new Point(5,2);
-			lock = 1;
-		}
-		if(type == Game.ILBLOCK){
-			pos[0] = new Point(4,0);
-			pos[1] = new Point(4,1);
-			pos[2] = new Point(4,2);
-			pos[3] = new Point(3,2);
-			lock = 1;
-		}
-		if(type == Game.SWIGBLOCK){
-			pos[0] = new Point(3,0);
+			pos[0] = new Point(4,-1);
 			pos[1] = new Point(4,0);
 			pos[2] = new Point(4,1);
 			pos[3] = new Point(5,1);
 			lock = 1;
 		}
-		if(type == Game.ISWIGBLOCK){
-			pos[0] = new Point(5,0);
+		if(type == Game.ILBLOCK){
+			pos[0] = new Point(4,-1);
 			pos[1] = new Point(4,0);
 			pos[2] = new Point(4,1);
 			pos[3] = new Point(3,1);
 			lock = 1;
 		}
+		if(type == Game.SWIGBLOCK){
+			pos[0] = new Point(3,-1);
+			pos[1] = new Point(4,-1);
+			pos[2] = new Point(4,0);
+			pos[3] = new Point(5,0);
+			lock = 1;
+		}
+		if(type == Game.ISWIGBLOCK){
+			pos[0] = new Point(5,-1);
+			pos[1] = new Point(4,-1);
+			pos[2] = new Point(4,0);
+			pos[3] = new Point(3,0);
+			lock = 1;
+		}
 		if(type == Game.TBLOCK){
-			pos[0] = new Point(3,0);
-			pos[1] = new Point(4,0);
-			pos[2] = new Point(5,0);
-			pos[3] = new Point(4,1);
+			pos[0] = new Point(3,-1);
+			pos[1] = new Point(4,-1);
+			pos[2] = new Point(5,-1);
+			pos[3] = new Point(4,0);
 			lock = 1;
 		}
 		if(type == Game.SQUAREBLOCK){
-			pos[0] = new Point(4,0);
-			pos[1] = new Point(5,0);
-			pos[2] = new Point(4,1);
-			pos[3] = new Point(5,1);
+			pos[0] = new Point(4,-1);
+			pos[1] = new Point(5,-1);
+			pos[2] = new Point(4,0);
+			pos[3] = new Point(5,0);
 			lock = -1;
 		}
 		if(type == Game.LINEBLOCK){
-			pos[0] = new Point(4,0);
-			pos[1] = new Point(4,1);
-			pos[2] = new Point(4,2);
-			pos[3] = new Point(4,3);
+			pos[0] = new Point(4,-1);
+			pos[1] = new Point(4,0);
+			pos[2] = new Point(4,1);
+			pos[3] = new Point(4,2);
 			lock = 1;
 		}
 	}
@@ -94,10 +94,13 @@ public class Bloco{
 	
 	public boolean canMove(int dir, int [][]map){
 		int can = 0;
-		for(int i = 0; i < 4; i++)
+		for(int i = 0; i < 4; i++){
+			if(pos[i].y<0)
+				return false;
 			if(pos[i].x + dir >-1 && pos[i].x + dir <10)
 				if(map[pos[i].y][pos[i].x + dir] == -1)
 					can ++;
+		}
 		return can == 4 ? true : false;
 	}
 
