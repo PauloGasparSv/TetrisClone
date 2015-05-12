@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.awt.Font;
 
 public class Panel extends JPanel implements Runnable,KeyListener{
 	public static final int WIDTH = 550;
@@ -37,6 +38,8 @@ public class Panel extends JPanel implements Runnable,KeyListener{
 		stage = new BufferedImage(WIDTH+20,HEIGHT+20,BufferedImage.TYPE_INT_RGB);
 		g = (Graphics2D) stage.getGraphics();
 		g.setBackground(new Color(68,80,128));
+		g.setFont(new Font("Arial",Font.BOLD, 24));
+		g.setColor(Color.BLACK);
 		gsm = new GameStateManager();
 		running = true;
 	}
