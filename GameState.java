@@ -1,4 +1,5 @@
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
 
 public class GameState{
 	protected GameStateManager gsm;
@@ -26,5 +27,11 @@ public class GameState{
 	public void keyReleased(int k){
 
 	}
+	public void mousePressed(int e){
 
+	}
+
+	public void mouseReleased(int e){
+		
+	}
 }

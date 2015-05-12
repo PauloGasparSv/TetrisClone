@@ -1,4 +1,5 @@
 import javax.swing.JPanel;
+import javax.swing.JFrame;
 import java.lang.Thread;
 import java.lang.Runnable;
 import java.awt.Color;
@@ -8,9 +9,11 @@ import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.Font;
 
-public class Panel extends JPanel implements Runnable,KeyListener{
+public class Panel extends JPanel implements Runnable,KeyListener,MouseListener{
 	public static final int WIDTH = 550;
 	public static final int HEIGHT = 600;
 	private boolean running;
@@ -18,9 +21,11 @@ public class Panel extends JPanel implements Runnable,KeyListener{
 	private BufferedImage stage;
 	private Graphics2D g;
 	private GameStateManager gsm;
+	private JFrame frame;
 
-	public Panel(){
+	public Panel(JFrame frame){
 		super();
+		this.frame = frame;
 		setPreferredSize(new Dimension(WIDTH,HEIGHT));
 		setFocusable(true);
 		requestFocus();
@@ -29,6 +34,7 @@ public class Panel extends JPanel implements Runnable,KeyListener{
 		super.addNotify();
 		if(thread == null){	
 			addKeyListener(this);
+			addMouseListener(this);
 			thread = new Thread(this);
 			thread.start();
 		}
@@ -40,7 +46,7 @@ public class Panel extends JPanel implements Runnable,KeyListener{
 		g.setBackground(new Color(68,80,128));
 		g.setFont(new Font("Arial",Font.BOLD, 24));
 		g.setColor(Color.BLACK);
-		gsm = new GameStateManager();
+		gsm = new GameStateManager(frame);
 		running = true;
 	}
 
@@ -79,5 +85,22 @@ public class Panel extends JPanel implements Runnable,KeyListener{
 		gsm.keyReleased(e.getKeyCode());
 	}
 	public void keyTyped(KeyEvent e) {
+	}
+
+	public void mouseClicked(MouseEvent e) {
+	}	
+	
+	public void mousePressed(MouseEvent e) {
+		gsm.mousePressed(e);
+	}
+	public void mouseReleased(MouseEvent e) {
+		gsm.mouseReleased(e);
+	}
+	
+	public void mouseEntered(MouseEvent e) {
+		
+	}
+	public void mouseExited(MouseEvent e) {
+		
 	}
 }

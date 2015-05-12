@@ -5,7 +5,7 @@ import java.lang.Thread;
 public class MyGame{
 	public static void main(String [] args){
 		JFrame frame = new JFrame("Tetris");
-		frame.setContentPane(new Panel());
+		frame.setContentPane(new Panel(frame));
 		frame.setVisible(true);	
 		frame.setResizable(false);
 		frame.pack();

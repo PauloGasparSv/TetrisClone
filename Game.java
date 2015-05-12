@@ -3,6 +3,9 @@ import java.awt.image.BufferedImage;
 import java.awt.event.KeyEvent;
 import java.util.Random;
 import java.awt.Font;
+import java.awt.event.MouseEvent;
+import java.awt.Rectangle;
+import java.awt.MouseInfo;
 
 public class Game extends GameState{
 	public final static int LBLOCK = 0, ILBLOCK =4, SWIGBLOCK = 3, ISWIGBLOCK =6, TBLOCK = 2, SQUAREBLOCK = 5, LINEBLOCK = 1;
@@ -27,6 +30,8 @@ public class Game extends GameState{
 	public boolean end;
 
 	private int nextBlock;
+
+	private Rectangle quitGame, newGame;
 
 	public Game(GameStateManager gsm, Loader loader){
 		super(gsm,loader);
@@ -68,6 +73,9 @@ public class Game extends GameState{
 		timerY = System.nanoTime();
 		level = 1;
 		next = 4;
+
+		quitGame = new Rectangle(410,350,110,30);
+		newGame = new Rectangle(410,405,110,30);
 	}	
 
 	public void update(double delta){
@@ -224,35 +232,30 @@ public class Game extends GameState{
 
 	public void draw(Graphics2D g){
 		g.clearRect(0,0,Panel.WIDTH+20,Panel.HEIGHT+20);
-		g.drawImage(background,0,0,null);
+		g.drawImage(background,5,5,null);
 
 		if(!end){
-			g.drawImage(nextBlockImg[nextBlock],400,50,null);
+			g.drawImage(nextBlockImg[nextBlock],405,55,null);
 			
-			g.drawString("Points: "+points,405,215);
-			g.drawString("Lines: "+lines,405,245);
-			g.drawString("Level: "+level,405,275);
-			g.drawString("Next: "+next,405,305);
+			g.drawString("Points: "+points,410,220);
+			g.drawString("Lines: "+lines,410,250);
+			g.drawString("Level: "+level,410,280);
+			g.drawString("Next: "+next,410,310);
 
 			for(int row = 0; row < 20; row ++){
 				for(int col = 0; col < 10; col ++){
 					if(blocks[row][col] != -1){
-						g.drawImage(blockImg[blocks[row][col]], 100+col*25,50+row*25,null);
+						g.drawImage(blockImg[blocks[row][col]], 105+col*25,55+row*25,null);
 					}
 				}
 			}
 
 			for(int i = 0; i < 4; i ++)
 				if(block.getPos()[i].y>-1)
-					g.drawImage(blockImg[block.getType()],100+block.getPos()[i].x*25,50+block.getPos()[i].y*25,null);
+					g.drawImage(blockImg[block.getType()],105+block.getPos()[i].x*25,55+block.getPos()[i].y*25,null);
 		}
 		else{
-			g.drawString("YOU LOSE BUDDY",120,250);
-			g.drawString("PRESS ENTER TO ",120,300);
-			g.drawString("TRY AGAIN",120,330);
-			g.drawString("PRESS ESCAPE TO ",120,380);
-			g.drawString("EXIT",120,410);
-
+			g.drawString("YOU LOSE BUDDY",125,255);
 		}
 	}
 
@@ -290,12 +293,7 @@ public class Game extends GameState{
 				}
 			}
 		}
-		else{
-			if(k == KeyEvent.VK_ENTER)
-				gsm.setState(GameStateManager.GAME);
-			if(k == KeyEvent.VK_ESCAPE)
-				System.exit(0);
-		}
+		
 
 	}
 
@@ -308,6 +306,23 @@ public class Game extends GameState{
 			turnKey = false;
 		if(k == KeyEvent.VK_DOWN)
 			downKey = false;
+	}
+
+	public void mousePressed(int e){
+		if(new Rectangle( (int)(MouseInfo.getPointerInfo().getLocation().x-
+			gsm.frame.getLocation().x),(int)(MouseInfo.getPointerInfo().getLocation().y-
+			gsm.frame.getLocation().y),4,4).intersects(newGame)){
+			gsm.setState(GameStateManager.MENU);
+		}
+		if(new Rectangle( (int)(MouseInfo.getPointerInfo().getLocation().x-
+			gsm.frame.getLocation().x),(int)(MouseInfo.getPointerInfo().getLocation().y-
+			gsm.frame.getLocation().y),4,4).intersects(quitGame)){
+			System.exit(0);
+		}
+	}
+
+	public void mouseReleased(int e){
+		
 	}
 
 }
